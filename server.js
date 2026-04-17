@@ -16,6 +16,17 @@ app.get('/produtos', async (req, res) => {
     }
 });
 
+app.patch('/produtos/:id/favorito', async (req, res) => {
+    const { id } = req.params;
+    const { favorito } = req.body;
+    try {
+        await db.query('UPDATE Produto SET favorito = ? WHERE idProduto = ?', [favorito, id]);
+        res.status(200).send("Atualizado");
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
 app.get('/', (req, res) => {
     res.json({ mensagem: "API da Padaria Santo Martins conectada!" });
 });
