@@ -8,8 +8,24 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/produtos', async (req, res) => {
+    const { categoria } = req.query;
+
     try {
-        const [rows] = await db.query('SELECT * FROM Produto');
+
+        let sql = `
+            SELECT P.* FROM Produto P
+            JOIN Produto_Categoria pc ON P.idProduto = pc.idProduto
+            JOIN Categoria c ON pc.idCategoria = c.idCategoria
+            ${categoria && categoria !== 'Todos os produtos' ? 'WHERE c.nome_categoria = ?' : ''}
+        `;
+        let params = [];
+
+        if (categoria && categoria !== 'Todos os produtos') {
+            sql += ' GROUP BY P.idProduto';
+            params = [categoria];
+        }
+        
+        const [rows] = await db.query(sql, params);
         res.json(rows);
     } catch (err) {
         res.status(500).json({ erro: "Erro ao buscar produtos", detalhes: err.message });
